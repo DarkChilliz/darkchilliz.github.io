@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Multistream, multivideo, and multichat for Twitch, Mixer, and Youtube.">
+<meta id="viewport" name="viewport" content="">
+<meta id="omnibar" name="theme-color" content="">
+<title>TwitchTheater.tv</title>
+<link rel="icon" type="image/png" href="favicon-192.png">
+<link rel="stylesheet" href="v19.7.css">
+<script src="v19.8-3.js"></script>
+<script src="https://player.twitch.tv/js/embed/v1.js"></script>
+<script src="https://www.youtube.com/player_api"></script>
+</head>
+<body onresize="layoutchg(2)" ondragover="event.preventDefault();event.stopPropagation()" ondrop="dropover(event,event.shiftKey)">
+<div id="eclipse" style="position:absolute;top:30%;width:100%;text-align:center"><img src="x20/eclipse.svg" alt=""></div>
+
+<div id="playdiv" class="rootdiv" style="background:#282832;height:100%;left:0px;right:340px;display:none"><div
+ id="playdsc">Multistream, multivideo, and multichat for Twitch, Mixer, and Youtube.</div><div id="playdrp"></div></div>
+<div id="chatdiv" class="rootdiv" style="background:#1E1E28;height:100%;width:340px;right:0px;display:none"
+ ondrop="dropover(event,2)"><img id="chatonl" src="x20/left.png" alt="" title="Toggle chat only mode" style="opacity:0.5"
+ onclick="chatonly(-1);layoutchg()"><img id="chatonr" src="x20/rght.png" alt="" title="Toggle chat only mode"
+ style="opacity:0.5;display:none" onclick="chatonly(-1);layoutchg()"><div id="chatnav"><img src="x20/prv.png" alt=""
+ title="Previous chat" onclick="nextopt(-1,'chatsel',1)"><select id="chatsel" style="width:65%" onchange="chgchat();sharelnk()"
+ disabled></select><img src="x20/nxt.png" alt="" title="Next chat" onclick="nextopt(1,'chatsel',1)"></div><div id="chatwin"
+ style="width:100%;top:50px;bottom:0px"></div></div>
+<div id="menudiv" class="rootdiv" style="min-width:50px;min-height:50px;right:0px;display:none"
+ onmouseover="showmenu(1)" onmouseout="showmenu(0)" ondragover="chgmenu(0);openmenu(1)">
+<img src="x20/back.png" alt="" id="backbtn" style="position:absolute;left:0px;display:none" onclick="chgmenu(0)">
+<img src="x20/menu.png" alt="" id="menubtn" style="position:absolute;right:0px" onclick="openmenu()">
+<div id="menutop" style="display:none"><span class="blu">TwitchTheater.tv </span><sup>v19.8</sup></div>
+<div id="menubot" style="display:none">
+<div id="notdiv" style="display:none" onclick="notifyusr(1)"><img src="x20/bel.png" alt="" style="float:left"><img
+ src="x20/rem.png" alt="" style="float:right;display:none" onclick="notifyusr(-1)"></div>
+
+<div id="mp0" style="padding:10px 0" onmouseover="chgextctl(event,-1)" onclick="evtchk(event);imgevt(event)">
+<div id="menudsc">Multistream, multivideo, and multichat<br>for Twitch, Mixer, and Youtube.</div>
+<div style="position:relative">
+<div id="blk1" class="menublk" ondragover="blckover(1,1)">
+<div class="menurow"><span id="strt" onclick="showctls(1)"></span><span id="strc"><img src="x20/pla.png" alt=""
+ title="Play all" onclick="playpause(1)"><img src="x20/pau.png" alt="" title="Pause all" onclick="playpause()"><img
+ src="x20/aud.png" alt="" title="Unmute all" onclick="chgaudio()"><img src="x20/mut.png" alt="" title="Mute all"
+ onclick="chgaudio(-1)"><img src="x20/eye.png" alt="" title="Swap visibility states" onclick="swpallvis()"><img
+ src="x20/fsc.png" alt="" title="Fullscreen with chat" onclick="gofullscr()"><img src="x20/pin.png" alt=""
+ title="Toggle controls view" onclick="pinextctl()" id="pinc" style="position:absolute"></span></div>
+<div id="strflds"></div>
+<div class="menurow"><input type="text" id="strtxt" style="margin:0" onkeydown="if (event.keyCode == 13 || event.keyCode == 10)
+ {addfromui(event.shiftKey);evtchk(event)}"><img src="x20/awc.png" alt="" title="Add with chat" onclick="addfromui(0)"><img
+ src="x20/add.png" alt="" title="Add without chat" onclick="addfromui(1)"></div>
+</div>
+<div id="scr1" class="menuscr" style="display:none" ondrop="blckover(1)" ondragleave="blckover(1)" onmouseover="blckover(1)"></div>
+</div>
+
+<div style="position:relative" ondrop="dropover(event,2)">
+<div id="blk2" class="menublk" ondragover="blckover(2,1)">
+<div class="menurow"><span onclick="showctls(1)">Chats:</span><img src="x20/eye.png"
+ alt="" id="chtc" title="Hide/show chat" onclick="hidechat(-1);layoutchg()"></div>
+<div class="menurow" id="chatfld" style="display:none"><a href="#" target="_blank"><img id="chtsrc" alt="" style="margin:0"
+ title="Open source link"></a><select id="chatmen" onchange="updsource('chtsrc',chats[this.selectedIndex])"></select><img
+ src="x20/str.png" alt="" title="Add this stream" onclick="addfromui(1,0)"><img src="x20/rel.png" alt=""
+ title="Reload this chat" onclick="relchat()"><img src="x20/rem.png" alt="" title="Remove this chat" onclick="remchat()"></div>
+<div class="menurow"><input type="text" id="chttxt" style="margin:0" onkeydown="if (event.keyCode == 13 || event.keyCode == 10)
+ {addfromui(2);evtchk(event)}"><img src="x20/add.png" alt="" title="Add chat" onclick="addfromui(2)"></div>
+</div>
+<div id="scr2" class="menuscr" style="display:none" ondrop="blckover(2)" ondragleave="blckover(2)" onmouseover="blckover(2)"></div>
+</div>
+
+<div class="menublk">
+<div id="shrlnk">Share: <a></a></div><br>
+<div class="btn submbtn" onclick="chgmenu(1)">Settings</div>
+<div class="btn submbtn" onclick="chgmenu(2)">Legend</div>
+<div class="btn submbtn" onclick="chgmenu(3)">FAQ</div>
+<div class="btn submbtn" onclick="chgmenu(4)">About</div>
+</div></div>
+
+<div id="mp1" class="submenu" style="display:none">
+<div class="tabbar">
+<div class="menutab" id="tb1" onclick="chgtabs(1)" style="border:0;color:#00B8F5;font-weight:bold">Chat</div>
+<div class="menutab" id="tb2" onclick="chgtabs(2)">Audio</div>
+<div class="menutab" id="tb3" onclick="chgtabs(3)">Video</div>
+<div class="menutab" id="tb4" onclick="chgtabs(4)">Other</div>
+</div><form id="opsform">
+
+<div id="tp1">
+<div class="menutxt"><input type="checkbox" id="lc" onclick="setchk(this.id);chatleft()"><label
+ for="lc">Move to left side</label></div>
+<div class="menutxt"><input type="checkbox" id="dc" onclick="setchk(this.id);chgCookie(this.chk,'darkchat')"><label
+ for="dc">Dark mode</label> (<span class="blu lnk" onclick="popupfaq(this,'faq-dark')">FAQ</span>)</div>
+<div class="menutxt"><input type="checkbox" id="pc" onclick="setchk(this.id);chgCookie(this.chk,'autochat')"><label
+ for="pc">Always load all added chats</label> (<span class="blu lnk" onclick="popupfaq(this,'faq-pcht')">FAQ</span>)</div>
+<div class="menutxt"><input type="checkbox" id="sc" onclick="setchk(this.id);chgCookie(this.chk,'switchat')"><label
+ for="sc">Auto-switch chat when adding streams</label></div>
+<div class="menutxt"><input type="checkbox" id="ac" onclick="setchk(this.id);chgCookie(this.chk,'audichat')"><label
+ for="ac">Change chat when switching audio</label> (<span class="blu lnk" onclick="popupfaq(this,'faq-chau')">FAQ</span>)</div>
+<div class="menutxt"><input type="checkbox" id="hc" onclick="setchk(this.id);chgCookie(this.chk,'hidswpch')"><label
+ for="hc">Change chat on hidden streams swap</label></div>
+<div class="menutxt">Twitch chat:
+<select id="hidebits" onchange="chttopvis(this.id)">
+<option value="0">Hide top padding</option>
+<option value="1">Hide top cheers</option>
+<option value="2">Dont hide anything</option>
+</select></div>
+<div class="menutxt">Youtube chat:
+<select id="ychattop" onchange="chttopvis(this.id)">
+<option value="0">Hide top padding</option>
+<option value="2">Dont hide anything</option>
+</select></div>
+</div>
+
+<div id="tp2" style="display:none">
+<div class="menutxt">Default audio state:
+<select id="muteaudi" style="width:100px" onchange="chgCookie(this.selectedIndex,'muteaudi',this.selectedIndex)">
+<option>Auto</option>
+<option>Muted</option>
+<option>Unmuted</option>
+<option>Unmuted (mute others)</option>
+</select></div>
+<div class="menutxt"><input type="checkbox" id="vo"
+ onclick="setchk(this.id);chgCookie(this.chk,'playrvol',document.getElementById('volval').value)"><label
+ for="vo">Default player volume: </label><input type="text" id="volval" style="width:30px"
+ onfocus="this.select()" onkeyup="setvolval(this)" onblur="chkvolval(this)"> %</div>
+<div class="menutxt"><input type="checkbox" id="au" onclick="setchk(this.id);chgCookie(this.chk,'autounmu')"><label
+ for="au">Disable smart auto-unmute</label> (<span class="blu lnk" onclick="popupfaq(this,'faq-aunm')">FAQ</span>)</div>
+<div class="menutxt"><input type="checkbox" id="ca" onclick="setchk(this.id);chgCookie(this.chk,'chataudi')"><label
+ for="ca">Change audio when switching chat</label></div>
+<div class="menutxt"><input type="checkbox" id="ha" onclick="setchk(this.id);chgCookie(this.chk,'audihidd')"><label
+ for="ha">Change audio on hidden streams swap</label></div>
+<div class="menutxt"><input type="checkbox" id="fa" onclick="setchk(this.id);chgCookie(this.chk,'fscraudi')"><label
+ for="fa">Switch audio to fullscreen player</label></div>
+</div>
+
+<div id="tp3" style="display:none">
+<div class="menutxt"><input type="checkbox" id="dq" onclick="setchk(this.id);chgselopt('defvqual',this.chk)"><label
+ for="dq">Default quality:</label>
+<select id="defvqual" onchange="chkselopt('dq')">
+<option value="auto">Auto</option>
+<option value="chunked">Source</option>
+<option value="720p60">720p60fps</option>
+<option value="720p30">720p</option>
+<option value="480p30">480p</option>
+<option value="360p30">360p</option>
+<option value="160p30">160p</option>
+</select> (<span class="blu lnk" onclick="popupfaq(this,'faq-vqua')">FAQ</span>)</div>
+<div class="menutxt">Change all video qualities now:<br>
+<select id="videoq" onchange="chgquality()">
+<option selected disabled>Change to...</option>
+<option value="auto">Auto</option>
+<option value="chunked">Source</option>
+<option value="720p60">720p60fps</option>
+<option value="720p30">720p</option>
+<option value="480p30">480p</option>
+<option value="360p30">360p</option>
+<option value="160p30">160p</option>
+</select> (<span class="blu lnk" onclick="popupfaq(this,'faq-vqua')">FAQ</span>)</div>
+<div class="menutxt"><input type="checkbox" id="cl"
+ onclick="setchk(this.id);updlayout();chgCookie(this.chk,'columnum',curcol)"><label for="cl">Custom player layout:</label>
+<img src="x20/prv.png" alt="" onclick="updlayout(-1);chgCookie(true,'columnum',curcol)"> <span id="cn"></span> columns
+<img src="x20/nxt.png" alt="" onclick="updlayout(1);chgCookie(true,'columnum',curcol)"></div>
+<div class="menutxt"><input type="checkbox" id="vc" onclick="setchk(this.id);chgCookie(this.chk,'playerui')"><label
+ for="vc">Hide player interface (on new additions)</label></div>
+</div>
+
+<div id="tp4" style="display:none">
+<div class="menutxt"><input type="checkbox" id="hm" onclick="if(!this.checked !== !this.chk){chgCookie(this.checked,'hidemenu')}
+ setchk(this.id);chgselopt('menuopaq',this.chk)"><label for="hm">Hide menu button when chat is hidden</label>
+<div class="txtpad">Button opacity:
+<select id="menuopaq" onchange="chkselopt('hm')">
+<option value="0">Transparent</option>
+<option value="0.25">25%</option>
+<option value="0.50">50%</option>
+<option value="0.75">75%</option>
+</select></div></div>
+<div class="menutxt"><input type="checkbox" id="hg" onclick="setchk(this.id);chgCookie(this.chk,'highplyr')"><label
+ for="hg">Mouse over controls highlights streams</label></div>
+<div class="menutxt"><input type="checkbox" id="sl" onclick="setchk(this.id);chgCookie(this.chk,'setuplnk');sharelnk()"><label
+ for="sl">Generate longer, more accurate links</label></div>
+<div class="menutxt"><input type="checkbox" id="ss" onclick="setchk(this.id);sharelnk()"><label
+ for="ss">Disable session saving</label></div>
+<div class="menutxt">Menu color:
+<select id="themesel" onchange="chgtheme()">
+<option value="">Bleed Purple</option>
+<option value="#113355">A Mix Of Blue</option>
+<option value="#222222">GrayFace</option>
+<option value="#883366">HeyGuys</option>
+<option value="#113344">Jolly Roger Bay</option>
+<option value="#553355">Grapes</option>
+<option value="#333344">Jeans</option>
+<option value="c">Custom</option>
+</select><div id="colordiv" class="txtpad"><br>Enter a custom HTML color code:<br>
+<input type="text" id="colortxt" onkeyup="chgtheme()" onblur="if(!this.parentNode.style.display){chgtheme()}">
+(see <span class="blu lnk" onclick="popupfaq(this,'faq-mcol')">FAQ</span>)</div></div>
+</div></form></div>
+
+<div id="mp2" class="submenu" style="display:none">
+<img src="x20/awc.png" alt=""> Add stream with chat<br>
+<img src="x20/add.png" alt=""> Add only the stream or chat<br>
+<img src="x20/rwc.png" alt=""> Remove stream with chat<br>
+<img src="x20/rem.png" alt=""> Remove only the stream or chat<br>
+<img src="x20/pla.png" alt=""> Play all paused streams<br>
+<img src="x20/pau.png" alt=""> Pause all streams<br>
+<img src="x20/aud.png" alt=""> Listen from here only (or unmute all)<br>
+<img src="x20/mut.png" alt=""> Mute all streams<br>
+<img src="x20/cht.png" alt=""> Add/show channel chat<br>
+<img src="x20/str.png" alt=""> Add/show channel stream<br>
+<img src="x20/mov.png" alt=""> Move stream position up<br>
+<img src="x20/rel.png" alt=""> Reload stream or chat<br>
+<img src="x20/eye.png" alt=""> Toggle stream or chat visibility<br>
+<img src="x20/fsc.png" alt=""> Enter/exit fullscreen mode<br>
+<img src="x20/pin.png" alt=""> Show and pin more stream controls<br>
+<br></div>
+
+<div id="mp3" class="submenu" style="display:none">
+<div class="faqn"><div
+ class="txtbld"><span></span>Cookie usage?</div><div>
+This website uses cookies to store the options you modify in the settings menu. That's it.
+Also, if you are blocking cookies you might have issues loading chat.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Keyboard / mouse shortcuts?</div><div>
+- F11 to fullscreen with chat<br>
+- Hold Shift to add streams without chat<br>
+- Hold Ctrl to close menu after an action<br>
+- Hold Shift when reloading a stream for it to remember its volume, quality, etc.<br>
+- Scrollwheel to change dropdown options
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Which services are supported?</div><div>
+Mainly Twitch but also Mixer and Youtube.
+Twitch channel names can be added as is, but for Mixer and Youtube you add the stream or video link instead
+(or the stream/video name preceded by "mixer=" or "v=" respectively. For example: mixer=monstercat v=0d0WB4sj7OE ).
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Which links are supported?</div><div>
+- Any Twitch stream, clip, or video link<br>(including video "collections").<br>
+- Any Mixer stream or video link<br>(clips hopefully soon).<br>
+- Any Youtube stream, video or playlist link.<br>
+- Links from other multi websites<br>
+Please message me with links that are not working.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Can I add multiple channels at once?</div><div>
+Yes! Just separate them by spaces, comas or forwardslashes. Add links one at a time.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Click to play/unmute?</div><div>
+These are new measures taken by modern web browsers to prevent websites
+from playing loud unwanted audio and wasting your valuable mobile data.
+Either click the icons to play/unmute the players or change the website permissions on your browser settings.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>How do I copy the link to my setup?</div><div>
+Right click the link and select "Copy link address" or "Copy link shortcut".
+On mobile, tap and hold the link to get the option.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>How does drag-and-drop work?</div><div>
+You may drag any one link (from other windows/tabs, like your followed channels page) and drop it anywhere on the website.
+Any subsequent streams should be added using the menu (which also supports drag-and-drop).
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Drag-and-drop not working?</div><div>
+Some (old?) web browsers disable this if you already have streams or chats on the screen.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Time stamps for VODs and videos</div><div>
+TwitchTheater now supports parameters on videos.
+The time parameter allows you to specify the time stamp where a video should start playing at when added.
+This allows you to create multi VOD Theater links where all the videos start playing at a different time stamp but in sync with each other.
+This is supported for Twitch, Mixer, and Youtube videos. The syntax is like so: "&t=11h22m33s"
+(a different digit for the hours, the minutes, and the seconds. Example: https://youtu.be/vnnf42BQTfo?list=PL2B009153AC977F90&t=6m11s ).
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Additional Youtube parameters</div><div>
+TwitchTheater supports additional parameters for Youtube videos. These are:
+"&loop" (to loop videos or playlists), and "&shuffle" (to shuffle videos on playlists).
+</div></div>
+<div class="faqn" id="faq-ytch"><div
+ class="txtbld"><span></span>Youtube chat issues</div><div>
+Known issues: (1) Chat replay is not yet available for 3rd party websites.
+(2) There is no difference between a Youtube video link and a Youtube live stream link,
+so videos might get added with a "video unavailable" chat window.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>VODs and clips dont have chat?</div><div>
+Chat replay is a feature that has not yet been made available for embedding.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>Stream hosting not working?</div><div>
+For now, you have to add the stream that is being hosted.
+</div></div>
+<div class="faqn" id="faq-ifrm"><div
+ class="txtbld"><span></span>Play/pause, mute/unmute not working?</div><div>
+Twitch clips (and sadly Mixer streams and VODs) dont yet allow/support some menu features.
+These include: play/pause, mute/unmute, volume, and video quality menu controls.
+If these functions stop working on other players, reload them.
+</div></div>
+<div class="faqn" id="faq-dark"><div
+ class="txtbld"><span></span>Chat dark mode not working?</div><div>
+This setting will be applied to new chats. Existing chats need to be reloaded.
+It has no effect on Mixer chats. If it stops working re-enable dark mode on the main website.
+</div></div>
+<div class="faqn" id="faq-pcht"><div
+ class="txtbld"><span></span>Only one chat loading when added?</div><div>
+This setting defaults to disabled to help people with slow connections.
+</div></div>
+<div class="faqn" id="faq-chau"><div
+ class="txtbld"><span></span>Changing audio not switching chat?</div><div>
+This only works with the menu controls.
+</div></div>
+<div class="faqn" id="faq-aunm"><div
+ class="txtbld"><span></span>How does smart auto-unmute work?</div><div>
+When the only player with audio is removed or goes offline, it will try to auto-unmute a different one.
+It will also auto-unmute streams that come back online if no other player is playing audio.
+</div></div>
+<div class="faqn" id="faq-vqua"><div
+ class="txtbld"><span></span>Default video quality not working?</div><div>
+This feature currently only works with Twitch streams and VODs (but not clips).
+</div></div>
+<div class="faqn" id="faq-chgq"><div
+ class="txtbld"><span></span>Wrong video quality got set?</div><div>
+The selected video quality was not available on one or more streams.
+The closest video quality on that player was used instead.
+</div></div>
+<div class="faqn" id="faq-fscr"><div
+ class="txtbld"><span></span>Why wont fullscreen zoom out?</div><div>
+This happens on mobile Chrome. Back out of fullscreen and let the
+Theater auto-adjust itself to the screen size (after you close the menu).
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>How to hide the address bar?</div><div>
+Some mobile web browsers allow you to hide the address bar to maximize the screen space available to the webpage
+(without going fullscreen). To do so, zoom in using your fingers, scroll down, then zoom out.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>What is the website's link format?</div><div>
+Add the stream names after the website address, separated by forwardslashes.
+To specify the chats to load, just add a "/c/" at the end of the URL
+and then add the chat names after that (also separated by forwardslashes).
+If the chat parameter is omitted, then the site will add chats based on the stream names.
+Use an empty chat parameter to prevent chats from getting added.
+Use it without streams and you will force load a clean session.
+</div></div>
+<div class="faqn"><div
+ class="txtbld"><span></span>How does session saving work?</div><div>
+It will store the streams and chats you are using and will restore them next time you open or reload the page.
+When loading the page with streams/chats in the URL, it will use that instead (and will store them).
+</div></div>
+<div class="faqn" id="faq-mcol"><div
+ class="txtbld"><span></span>Custom menu color?</div><div>
+Search Google for an "online color picker", make the color of your choice,
+then copy the color code with a format like: #336699 (with or without the hash character). Dark colors recommended.
+</div></div>
+</div>
+
+<div id="mp4" class="submenu" style="display:none">
+Watch multiple live streams and videos from Twitch, Mixer, and Youtube on theater or fullscreen mode, with the live chat of your choosing.
+Play with the wide variety of options and menu controls to make the experience feel more like you.
+I constantly develop this website independently on my spare time and
+it's available here for everyone to enjoy, so I really hope you do! :)
+<br><br>
+Please share your thougths, suggestions, bug reports with me on twitter (tweets and DMs)<br>
+<a target="_blank" href="http://twitter.com/TwitchTheaterTv">@TwitchTheaterTv</a>
+<br><br>
+Website code and images: Luis Figueroa<br>
+Twitch player and chat embed: <a target="_blank" href="http://twitch.tv/">Twitch.tv</a><br>
+Mixer player and chat embed: <a target="_blank" href="http://mixer.com/">Mixer.com</a><br>
+Youtube player and chat embed: <a target="_blank" href="http://youtube.com/">Youtube.com</a>
+<br><br>
+<a target="_blank" href="https://u.muxy.io/tip/metalj" class="btn" style="padding:10px 15px">Support development / server costs</a>
+<br><br><br>
+</div></div>
+
+<div id="diagdiv" class="submenu" style="display:none">
+<div id="diagtxt"></div><br>
+<div id="diagno" class="btn submbtn" style="float:right">No</div>
+<div id="diagok" class="btn submbtn" style="float:right"></div>
+</div></div>
+<div id="devdiv" class="rootdiv" style="background:black;padding:5px;display:none"></div>
+</body>
+
+</html>
